@@ -49,14 +49,17 @@ def process_pdf_for_obfuscation(input_path, output_buffer):
             for element in text_elements:
                 noisy_text = add_noise_to_text(element['text'])  # テキストにノイズを追加
                 try:
-                    if element['fontname'] not in pdfmetrics.getFontNames():
+                    fontname_to_check = element['fontname']
+                    registered_fonts = pdfmetrics.getRegisteredFonts()
+                    if fontname_to_check not in registered_fonts:
                         try:
-                            # より現実的なフォント登録処理は複雑になるため、ここでは省略
+                            # より現実的なフォント登録処理は複雑になるため、ここでは一旦スキップ
+                            # 埋め込みフォントがない場合は標準フォントを使用
                             c.setFont("Helvetica", element['fontsize'])
                         except Exception as e:
                             c.setFont("Helvetica", element['fontsize'])
                     else:
-                        c.setFont(element['fontname'], element['fontsize'])
+                        c.setFont(fontname_to_check, element['fontsize'])
 
                     c.drawString(element['x'], element['y'], noisy_text)  # ノイズ付きテキストを描画
                 except Exception as e:
